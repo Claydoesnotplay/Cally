@@ -214,6 +214,191 @@ fun OnboardingScreen(
             StepCard(
                 index = stepIdx++,
                 icon = Icons.Outlined.LockOpen,
+                title = stringResource(R.string.onboarding_step_perms),
+                desc = stringResource(R.string.onboarding_step_perms_desc),
+                done = allRuntimeGranted,
+                action = if (!allRuntimeGranted) requestPerms else null,
+                actionLabel = stringResource(R.string.onboarding_step_overlay_action),
+            )
+            StepCard(
+                index = stepIdx++,
+                icon = Icons.Outlined.Layers,
+                title = stringResource(R.string.onboarding_step_overlay),
+                desc = stringResource(R.string.onboarding_step_overlay_desc),
+                done = overlayGranted,
+                action = if (!overlayGranted) {
+                    {
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            "package:${ctx.packageName}".toUri(),
+                        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        runCatching { ctx.startActivity(intent) }
+                    }
+                } else null,
+                actionLabel = stringResource(R.string.onboarding_step_overlay_action),
+            )
+            StepCard(
+                index = stepIdx++,
+                icon = Icons.Outlined.BatteryFull,
+                title = stringResource(R.string.onboarding_step_battery),
+                desc = stringResource(R.string.onboarding_step_battery_desc),
+                done = batteryExempt,
+                action = if (!batteryExempt) {
+                    { BatteryOptimizations.requestExemption(ctx) }
+                } else null,
+                actionLabel = stringResource(R.string.onboarding_step_battery_action),
+            )
+
+            ElevatedCard(modifier = Modifier.padding(0.dp).fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        stringResource(R.string.onboarding_shizuku_tip_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.onboarding_shizuku_tip_body),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    TextButton(
+                        onClick = { uriHandler.openUri(SHIZUKU_FORK_URL) },
+                    ) {
+                        Text(stringResource(R.string.onboarding_shizuku_tip_cta))
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Manual recheck — re-polls all sources at once.
+            OutlinedButton(
+                onClick = {
+                    container.shizuku.refresh()
+                    overlayGranted = Settings.canDrawOverlays(ctx)
+                    batteryExempt = BatteryOptimizations.isIgnoring(ctx)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Outlined.Refresh, contentDescription = null)
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.onboarding_recheck))
+            }
+
+            AnimatedVisibility(
+                visible = state is DaemonHealth.NoPermission,
+                enter = fadeIn(spring(stiffness = 200f)),
+                exit = fadeOut(tween(150)),
+            ) {
+                Text(
+                    text = stringResource(R.string.err_shizuku_denied) +
+                        stringResource(R.string.err_shizuku_denied_manual),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+
+            Button(
+                onClick = {
+                    scope.launch {
+                        container.settings.setOnboardingDone(true)
+                        onDone()
+                    }
+                },
+                enabled = readyToContinue,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(stringResource(R.string.onboarding_continue)) }
+
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun StepCard(
+    index: Int,
+    icon: ImageVector,
+    title: String,
+    desc: String,
+    done: Boolean,
+    action: (() -> Unit)?,
+    actionLabel: String,
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = if (done) MaterialTheme.colorScheme.secondaryContainer
+            else MaterialTheme.colorScheme.surfaceContainerHigh,
+        ),
+        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                    if (done) {
+                        Icon(
+                            Icons.Outlined.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(36.dp),
+                        )
+                    } else {
+                        Icon(
+                            icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "$index. $title",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        desc,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            if (action != null) {
+                Spacer(Modifier.height(12.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.weight(1f))
+                    OutlinedButton(onClick = action) { Text(actionLabel) }
+                }
+            }
+        }
+    }
+}
+
+private fun openShizukuStorePage(ctx: android.content.Context) {
+    // Send users to thedjchi/Shizuku GitHub releases — community build with
+    // auto-restart watchdog and persistent ADB pairing. Upstream RikkaApps
+    // is rarely updated; Play Store delivers the stale upstream too.
+    val web = Intent(Intent.ACTION_VIEW, "https://github.com/thedjchi/Shizuku/releases".toUri())
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching { ctx.startActivity(web) }
+}
+
+private fun openShizukuApp(ctx: android.content.Context) {
+    val launch = ctx.packageManager.getLaunchIntentForPackage("moe.shizuku.privileged.api")
+    if (launch != null) {
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        runCatching { ctx.startActivity(launch) }
+    } else {
+        openShizukuStorePage(ctx)
+    }
+}
+abel = stringResource(R.string.onboarding_notif_perm_title),
+                )
+            }
+            StepCard(
+                index = stepIdx++,
+                icon = Icons.Outlined.LockOpen,
                 title = "Дозволи системи",
                 desc = "Мікрофон, сповіщення, статус телефону, журнал дзвінків, контакти — щоб запис стартував і поряд із записом було видно, з ким говорили.",
                 done = allRuntimeGranted,
