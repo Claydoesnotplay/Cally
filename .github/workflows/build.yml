@@ -1,8 +1,11 @@
 name: Build debug APK
 
 on:
-  push:
   workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -17,6 +20,8 @@ jobs:
 
       # Installs the Android SDK and accepts licenses so AGP can pull compileSdk 37.
       - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
 
       - uses: gradle/actions/setup-gradle@v4
 
