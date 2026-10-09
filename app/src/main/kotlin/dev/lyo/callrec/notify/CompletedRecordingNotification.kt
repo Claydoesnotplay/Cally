@@ -62,7 +62,7 @@ object CompletedRecordingNotification {
             // VISIBILITY_PRIVATE: lockscreen shows only the channel name +
             // generic "Saved" placeholder, full subtitle (contact name +
             // duration) appears after unlock. Earlier VISIBILITY_PUBLIC
-            // leaked PII like "Дзвінок записано: Джерело — Харків · 3:42"
+            // leaked PII like "Call recorded: Source — Kharkiv · 3:42"
             // to anyone glancing at the lockscreen — a real OPSEC concern
             // for journalist/high-risk personas. The active recording
             // notification stays PUBLIC by design (T3 threat-model decision
@@ -96,7 +96,7 @@ object CompletedRecordingNotification {
     private fun formatDuration(totalSec: Long): String {
         val m = totalSec / 60
         val s = totalSec % 60
-        return if (m == 0L) "${s} с" else "%d:%02d".format(m, s)
+        return if (m == 0L) "${s} s" else "%d:%02d".format(m, s)
     }
 
     private fun notificationIdFor(callId: String): Int =
