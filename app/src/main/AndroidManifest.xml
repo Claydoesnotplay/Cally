@@ -6,7 +6,7 @@
       INTERNET is required for cloud transcription only — audio is sent to a
       user-configured OpenAI-compatible endpoint (default: OpenRouter with
       Gemini Flash). Transcription is OPT-IN: it runs only when the user
-      taps "Розпізнати мову" on a record AND has entered an API key in
+      taps "Transcribe" on a record AND has entered an API key in
       Settings. Recording itself never touches the network. The endpoint URL
       is fully user-configurable so privacy-conscious users can point at a
       self-hosted LM Studio / Ollama server.
