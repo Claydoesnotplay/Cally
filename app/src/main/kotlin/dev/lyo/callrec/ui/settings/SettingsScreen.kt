@@ -394,7 +394,7 @@ private fun SampleRateRow(
                     onCheckedChange = { onSelect(rate) },
                     shapes = ToggleButtonDefaults.shapes(),
                     modifier = Modifier.weight(1f),
-                ) { Text("${rate / 1000} кГц") }
+                ) { Text("${rate / 1000} kHz") }
             }
         }
     }
@@ -512,7 +512,7 @@ private val SIZE_CHOICES: List<Int?> = listOf(null, 1, 2, 5, 10, 20, 50)
 /**
  * Generic title + description + horizontally-flowing chip group used by
  * both auto-cleanup rows. `null` in [choices] represents the OFF choice
- * (rendered as "Не очищати" via [labelFor]).
+ * (rendered as "Don't clean up" via [labelFor]).
  */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
