@@ -1106,7 +1106,7 @@ private data class SpeakerAccent(
 
 /**
  * Order in `speakers` drives palette assignment. The first speaker — by
- * convention "Я"/ME for phone calls or the dominant voice for voice memos —
+ * convention "Me"/ME for phone calls or the dominant voice for voice memos —
  * gets `primaryContainer` from the active scheme and right alignment,
  * mirroring "own messages" in a chat client. Subsequent speakers each draw
  * from a curated 8-hue palette so even meetings with 4–5 distinct voices
@@ -1170,8 +1170,8 @@ private fun chatAccents(dark: Boolean): List<SpeakerAccent> = if (dark) {
 }
 
 private fun legacyDisplayLabel(id: String): String = when (id) {
-    dev.lyo.callrec.transcription.Transcript.LEGACY_ME -> "Я"
-    dev.lyo.callrec.transcription.Transcript.LEGACY_THEM -> "Співрозмовник"
+    dev.lyo.callrec.transcription.Transcript.LEGACY_ME -> "Me"
+    dev.lyo.callrec.transcription.Transcript.LEGACY_THEM -> "Other party"
     dev.lyo.callrec.transcription.Transcript.LEGACY_UNKNOWN -> "—"
     else -> id
 }
@@ -1316,22 +1316,22 @@ private fun SpeakerAvatar(label: String, accent: SpeakerAccent) {
 }
 
 private fun toneLabel(t: String): String = when (t.lowercase()) {
-    "friendly" -> "тепло"
-    "tense" -> "напружено"
-    "excited" -> "захоплено"
-    "sad" -> "сумно"
-    "angry" -> "зло"
-    "questioning" -> "питально"
-    "neutral" -> "нейтрально"
+    "friendly" -> "warm"
+    "tense" -> "tense"
+    "excited" -> "excited"
+    "sad" -> "sad"
+    "angry" -> "angry"
+    "questioning" -> "questioning"
+    "neutral" -> "neutral"
     else -> t
 }
 
 private fun nonSpeechLabel(s: String): String = when (s.lowercase()) {
-    "laugh" -> "сміх"
-    "sigh" -> "зітхання"
-    "pause" -> "пауза"
-    "cough" -> "кашель"
-    "background_music" -> "музика"
-    "background_voice" -> "голос на фоні"
+    "laugh" -> "laughter"
+    "sigh" -> "sigh"
+    "pause" -> "pause"
+    "cough" -> "cough"
+    "background_music" -> "music"
+    "background_voice" -> "background voice"
     else -> s
 }
