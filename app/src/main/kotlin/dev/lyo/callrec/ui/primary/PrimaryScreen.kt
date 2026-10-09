@@ -567,7 +567,7 @@ private fun StatusBanner(
                     )
                     // Hide the downlink row entirely for voice-memo sessions —
                     // there is no remote party, so showing a greyed-out
-                    // "Співрозмовник" row is misleading. For real calls we
+                    // "Other party" row is misleading. For real calls we
                     // keep the disabled row to communicate "we tried but the
                     // OEM blocks it".
                     if (!levels.voiceMemo) {
@@ -902,7 +902,7 @@ private fun RecordingRow(
 private fun subtitle(rec: CallRecord): String {
     val durMs = (rec.endedAt ?: rec.startedAt) - rec.startedAt
     val secs = (durMs / 1000).coerceAtLeast(0)
-    val dur = if (secs >= 60) "%d:%02d".format(secs / 60, secs % 60) else "${secs}с"
+    val dur = if (secs >= 60) "%d:%02d".format(secs / 60, secs % 60) else "${secs}s"
     val parts = mutableListOf(dur)
     rec.contactNumber?.takeIf { it.isNotBlank() && rec.contactName != null }?.let { parts.add(it) }
     return parts.joinToString("  •  ")
@@ -916,8 +916,8 @@ private fun isVoiceMemo(rec: CallRecord): Boolean = rec.mode == MODE_VOICE_MEMO
 
 private fun displayTitle(ctx: Context, rec: CallRecord): String {
     // Prefer the AI-generated title from the transcript when present — for
-    // voice memos this turns "Голосовий запис · 28 квіт, 15:42" into
-    // something descriptive like "Список покупок і плани на вихідні".
+    // voice memos this turns "Voice memo · Apr 28, 15:42" into
+    // something descriptive like "Shopping list and weekend plans".
     // Cheap to extract: a single JSONObject parse, no full transcript load.
     val aiTitle = dev.lyo.callrec.transcription.TranscriptCodec.extractTitle(rec.transcript)
     if (isVoiceMemo(rec)) {
