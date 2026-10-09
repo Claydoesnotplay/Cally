@@ -17,6 +17,8 @@ jobs:
 
       # Installs the Android SDK and accepts licenses so AGP can pull compileSdk 37.
       - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
 
       - uses: gradle/actions/setup-gradle@v4
 
